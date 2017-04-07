@@ -5,19 +5,11 @@
  * http://www.spoj.com/problems/MARBLES/
  */
 
-long long int combination(int n, int k)
+long double factorial(double x)
 {
-	int i = 0;
-
-	long double s = 1;
-	long double j = 1;
-
-	for (i = n-k+1; i < n; i++)
-		j *= i;
-	for (i = 1; i < k; i++)
-		s *= i;
-
-	return j /= s;
+	if (x == 0)
+		return 1;
+	return x * factorial(x - 1);
 }
 
 int main(void)
@@ -29,7 +21,8 @@ int main(void)
 	scanf("%d", &T);
 	while (T--) {
 		scanf("%d %d", &n, &k);
-		printf("%lld\n", combination(n, k));
+		printf("%0.Lf\n", factorial(n - 1) /
+			((factorial(k - 1) * factorial(n - k))));
 	}
 	return 0;
 }
