@@ -3,6 +3,7 @@
 /*
  * TEST - Life, the Universe, and Everything
  * http://www.spoj.com/problems/TEST/
+ * http://ideone.com/f082au
  */
 
 int main(void)
