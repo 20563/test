@@ -3,6 +3,7 @@
 /*
  * MARBLES - Marbles
  * http://www.spoj.com/problems/MARBLES/
+ * http://ideone.com/1CtxW3
  */
 
 long double factorial(double x)
