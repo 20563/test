@@ -5,23 +5,21 @@
 /*
  * BFN1 - Zabawne Dodawanie Piotrusia
  * http://pl.spoj.com/problems/BFN1/
- * http://ideone.com/dRAiBR
+ * http://ideone.com/HptsOd
  */
 
 int32_t revert(int32_t liczba)
 {
 	int32_t cyfry = 0;
-	int32_t i = 1;
 
 	while (liczba) {
-		cyfry = (cyfry * i) + (liczba % 10);
+		cyfry = (cyfry * 10) + (liczba % 10);
 		liczba /= 10;
-		i = 10;
 	}
 	return cyfry;
 }
 
-int8_t isPalindrom(int32_t liczba)
+_Bool isPalindrom(int32_t liczba)
 {
 	if (liczba == revert(liczba))
 		return 1;
@@ -30,7 +28,7 @@ int8_t isPalindrom(int32_t liczba)
 
 int main(void)
 {
-	int32_t t;
+	int8_t t;
 	int32_t n;
 	int8_t i;
 
@@ -42,7 +40,7 @@ int main(void)
 			n += revert(n);
 			i++;
 		}
-		printf("%" PRId32 " %" PRId32 "\n", n, i);
+		printf("%" PRId32 " %" PRId8 "\n", n, i);
 	}
 	return 0;
 }
