@@ -3,8 +3,10 @@
 /*
  * PRZEDSZK - Przedszkolanka
  * http://pl.spoj.com/problems/PRZEDSZK/
- * http://ideone.com/eqe9HT
+ * http://ideone.com/8n802L
  */
+
+#include <stdio.h>
 
 int main(void)
 {
@@ -13,11 +15,9 @@ int main(void)
 	int b;
 	int i;
 	int t;
-	int j;
 
 	scanf("%d", &N);
 	for (i = 0; i < N; i++) {
-		j = 0;
 		scanf("%d %d", &a, &b);
 		if (a > b) {
 			t = a;
@@ -25,11 +25,9 @@ int main(void)
 			b = t;
 		}
 		t = b;
-		while ((t % a) != 0) {
+		while ((t % a) != 0)
 			t += b;
-			j++;
-			}
-			printf("%d\n", t);
+		printf("%d\n", t);
 	}
 	return 0;
 }
