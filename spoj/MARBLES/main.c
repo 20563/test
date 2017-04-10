@@ -3,27 +3,35 @@
 /*
  * MARBLES - Marbles
  * http://www.spoj.com/problems/MARBLES/
- * http://ideone.com/1CtxW3
+ * http://ideone.com/EyGuFl
  */
 
-long double factorial(double x)
+long long combination(int n, int k)
 {
-	if (x == 0)
-		return 1;
-	return x * factorial(x - 1);
+	int i = 0;
+	long long j = 1;
+	int l = 1;
+
+	for (i = n-k+1; i < n; i++) {
+		j = (j * i) / l;
+		l++;
+	}
+	return j;
 }
 
 int main(void)
 {
-	int T;
-	int n;
-	int k;
+	int T = 0;
+	int n = 0;
+	int k = 0;
+	long long i = 0;
 
 	scanf("%d", &T);
 	while (T--) {
 		scanf("%d %d", &n, &k);
-		printf("%0.Lf\n", factorial(n - 1) /
-			((factorial(k - 1) * factorial(n - k))));
+		i = 0;
+		i = (combination(n, k));
+		printf("%lld\n", i);
 	}
 	return 0;
 }
