@@ -11,10 +11,8 @@
 
 int main(void)
 {
-	int8_t t;
-	int8_t n;
+	int8_t t, n;
 	int8_t *tablica;
-	int8_t element;
 	int8_t i = 0;
 
 	scanf("%" SCNd8, &t);
@@ -23,8 +21,7 @@ int main(void)
 		tablica = (int8_t *)malloc(n * sizeof(int8_t));
 		i = 0;
 		while (n--) {
-			scanf("%" SCNd8, &element);
-			tablica[i] = element;
+			scanf("%" SCNd8, &tablica[i]);
 			i++;
 		}
 		while (i--) {
