@@ -11,9 +11,7 @@
 
 int main(void)
 {
-	int8_t t, n;
-	int8_t *tablica;
-	int8_t i = 0;
+	int8_t t, n, *tablica, i = 0;
 
 	scanf("%" SCNd8, &t);
 	while (t--) {
