@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 /*
  * PA05_POT - Czy umiesz potęgować
@@ -8,19 +10,15 @@
 
 int main(void)
 {
-	int D;
-	long int a;
-	long int b;
-	int c[3];
-	int i;
-	long long int wynik;
-	int l;
+	int8_t D, c[3], i, l;
+	int32_t a, b;
+	int64_t wynik;
 
-	scanf("%d", &D);
+	scanf("%" SCNd8, &D);
 	for (i = 0; i < D; i++) {
 		wynik = 1;
 		l = 0;
-		scanf("%ld %ld", &a, &b);
+		scanf("%" SCNd32 " %" SCNd32, &a, &b);
 		c[0] = a % 10;
 		c[1] = ((c[0] * c[0]) % 10);
 		c[2] = ((c[1] * c[1]) % 10);
@@ -31,7 +29,7 @@ int main(void)
 			if (l < 2)
 				l++;
 		}
-		printf("%d\n", (int)(wynik % 10));
+		printf("%" PRId8 "\n", (wynik % 10));
 	}
 	return 0;
 }
