@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 /*
  * PRIME_T - Liczby Pierwsze
@@ -8,32 +10,25 @@
 
 int main(void)
 {
-	int n;
-	int l;
-	int t;
-	int i;
-	int j;
-	int wynik;
+	int32_t nTest, i;
+	int16_t number, tmp, wynik;
+	int8_t j;
 
-	scanf("%d", &n);
-	for (i = 0; i < n; i++) {
-		scanf("%d", &l);
-		t = l;
+	scanf("%" SCNd32, &nTest);
+	for (i = 0; i < nTest; i++) {
+		scanf("%" SCNd16, &number);
+		tmp = number;
 		j = 0;
-		while (--t > 1) {
-			wynik = l % t;
+		while (--tmp > 1) {
+			wynik = number % tmp;
 			if (wynik == 0) {
-				printf("NIE\n");
 				j = 1;
 				break;
 			}
 		}
-		if (l == 1) {
-			printf("NIE\n");
+		if (number == 1)
 			j = 1;
-		}
-		if (j == 0)
-			printf("TAK\n");
+		printf( j == 0 ? "TAK\n" : "NIE\n");
 	}
 	return 0;
 }
