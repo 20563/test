@@ -29,7 +29,7 @@ int main(void)
 			if (l < 2)
 				l++;
 		}
-		printf("%" PRId8 "\n", (wynik % 10));
+		printf("%" PRId8 "\n", (int8_t)(wynik % 10));
 	}
 	return 0;
 }
