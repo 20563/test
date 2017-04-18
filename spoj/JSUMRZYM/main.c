@@ -39,7 +39,7 @@ int16_t atr(char *liczba)
 
 char *rta(int16_t liczba)
 {
-	int8_t ileZnakow = 0, last = 0, tmp = 0, mod = 0, i = 0, j = 0;
+	int8_t ileZnakow = 0, mod = 0, i = 0;
 
 	/*
 	 * Letters required for number representation in roman
@@ -47,7 +47,7 @@ char *rta(int16_t liczba)
 	 */
 
 	int8_t map[10] = {0, 1, 2, 3, 2, 1, 2, 3, 4, 2};
-	char *output = (char *)malloc(sizeof(*output));
+	char *output = (char *)malloc(sizeof(*output)), *out = output, tmp;
 
 	while (liczba) {
 		ileZnakow += map[liczba % 10];
@@ -56,27 +56,26 @@ char *rta(int16_t liczba)
 		mod = liczba % 5;
 		if (mod == 4) {
 			if (((liczba - 4) % 10) == 0)
-				output[j++] = roman[i+1];
+				*out++ = roman[i+1];
 			else
-				output[j++] = roman[i+2];
-			output[j++] = roman[i];
+				*out++ = roman[i+2];
+			*out++ = roman[i];
 		} else {
-			tmp = mod;
-			while (tmp--)
-				output[j++] = roman[i];
+			while (mod--)
+				*out++ = roman[i];
 			if ((liczba % 10) >= 5)
-				output[j++] = roman[i+1];
+				*out++ = roman[i+1];
 		}
 		liczba /= 10;
 		i += 2;
-		output[j] = '\0';
+		*out = '\0';
 	}
-	last = j - 1;
-	for (i = 0; i < j/2; i++) {
+
+	for(i = 0; i < ileZnakow; i++){
 		tmp = output[i];
-		output[i] = output[last];
-		output[last] = tmp;
-		last--;
+		output[i] = output[ileZnakow-1];
+		output[ileZnakow-1] = tmp;
+		ileZnakow--;
 	}
 	return output;
 }
