@@ -1,14 +1,74 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
+
+/* we can compile with flag -DNDEBUG or #define NDEBUG
+ * but this only disable assert, not test function
+ */
+
+#define UNIT_TEST
+#ifdef UNIT_TEST
 #include <assert.h>
 #include <string.h>
+#endif /* UNIT_TEST */
 
 /*
  * JSUMRZYM - Dodawanie rzymskie
  * http://pl.spoj.com/problems/JSUMRZYM/
  * http://ideone.com/edBLzT
  */
+
+
+#ifdef UNIT_TEST
+#define CHECK_ART(number, a, b, input) check_atr(a, b, input, number)
+
+static char *atr(int16_t number);
+
+/**
+ * check() - test to check function
+ *
+ * @a: first value
+ * @b: second value
+ * @input: pointer to expected value
+ * @number: test number
+ *
+ * Return: display if test is done or fail,
+ * and when fail then returns assert
+ */
+
+static void check_atr(int16_t a, int16_t b, char *input, int8_t number)
+{
+	char *output = NULL;
+	int8_t c = 0;
+
+	output = atr(a + b);
+	c = strcmp(input, output);
+	printf("test: %04" PRId8 " [%s] %" PRId16 " %" PRId16 " %s %s\n",
+		number, (c == 0)?"done":"fail", a, b, output, input);
+	assert(c == 0);
+}
+
+/**
+ * run_tests() - start all tests
+ */
+
+void run_tests(void)
+{
+	CHECK_ART(1, 2, 1, "III");
+	CHECK_ART(2, 1000, 1, "MI");
+	CHECK_ART(3, 123, 157, "CCLXXX");
+	CHECK_ART(4, 145, 23, "CLXVIII");
+	CHECK_ART(5, 3887, 1, "MMMDCCCLXXXVIII");
+	CHECK_ART(6, 3999, 0, "MMMCMXCIX");
+	CHECK_ART(7, 14, 4, "XVIII");
+	CHECK_ART(8, 123, 256, "CCCLXXIX");
+	CHECK_ART(9, 4, 5, "IX");
+	CHECK_ART(10, 20, 4, "XXIV");
+}
+
+#else
+void run_tests(void) {}
+#endif /* UNIT_TEST */
 
 const char roman[7] = {'I', 'V', 'X', 'L', 'C', 'D', 'M'};
 const int16_t arabic[7] = {1, 5, 10, 50, 100, 500, 1000};
@@ -65,7 +125,7 @@ static char *atr(int16_t number)
 	 * 0 = 0, 1 = 1, 2 = 2, 3 = 3, 4 = 2, 5 = 1, 6 = 2, 7 = 3, 8 = 4, 9 = 2
 	 */
 
-	int8_t map[] = {0, 1, 2, 3, 2, 1, 2, 3, 4, 2};
+	static int8_t map[] = {0, 1, 2, 3, 2, 1, 2, 3, 4, 2};
 	static char output[15] = {0};
 	char *out = output, tmp;
 
@@ -77,7 +137,7 @@ static char *atr(int16_t number)
 		chars_num += map[number % 10];
 		mod = number % 5;
 		if (mod == 4) {
-			if (((number - 4) % 10) == 0)
+			if ((number - 4) % 10 == 0)
 				*out++ = roman[i+1];
 			else
 				*out++ = roman[i+2];
@@ -105,14 +165,13 @@ static char *atr(int16_t number)
 	return output;
 }
 
-
 /*
  * longest number 3888 MMMDCCCLXXXVIII 15 chars
  * highest number 3999 MMMCMXCIX 12 bits
  */
 
 /**
- * main() - sum two numbers in arabic and return in roman
+ * main()
  *
  * @a: first number in roman
  * @b: second number in roman
@@ -122,30 +181,18 @@ static char *atr(int16_t number)
  * Return: display result of sum and return 0;
  */
 
-static void check(int16_t a, int16_t b, char *input, int8_t number)
-{
-	char *output = NULL;
-	int8_t c = 0;
-
-	output = atr(a + b);
-	c = strcmp(input, output);
-	printf("test[%" PRId8 "] %s %" PRId16 " %" PRId16 " %s %s\n", number,
-		(c == 0)?"done":"fail", a, b, output, input);
-	assert(c == 0);
-}
-
-#define CHECK_ART(number, a, b, input) check(a, b, input, number)
-
 int main(void)
 {
 	char a[16] = {0}, b[16] = {0}, *output = NULL;
 
-	CHECK_ART(1, 2, 1, "III");
-	CHECK_ART(2, 1000, 1, "MI");
-	CHECK_ART(3, 123, 157, "CCLXXX");
-	CHECK_ART(4, 145, 23, "CLXVIII");
-	CHECK_ART(5, 3887, 1, "MMMDCCCLXXXVIII");
-	CHECK_ART(6, 3999, 0, "MMMCMXCIX");
+	/* we doesnt need to add #ifdef
+	 * because if UNIT_TEST is not defined
+	 * then function returns void
+	 */
+
+#ifdef UNIT_TEST
+	run_tests();
+#endif /* UNIT_TEST */
 
 	while (scanf("%15s %15s", a, b) == 2) {
 		output = atr(rta(a) + rta(b));
