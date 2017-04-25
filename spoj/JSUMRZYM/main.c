@@ -18,11 +18,11 @@
  * http://ideone.com/edBLzT
  */
 
+static int16_t rta(const char *number);
+static char *atr(int16_t number);
 
 #ifdef UNIT_TEST
 #define CHECK_ART(number, a, b, input) check_atr(a, b, input, number)
-
-static char *atr(int16_t number);
 
 /**
  * check() - test to check function
