@@ -22,7 +22,7 @@ static int16_t rta(const char *number);
 static char *atr(int16_t number);
 
 #ifdef UNIT_TEST
-#define CHECK_ART(number, a, b, input) check_atr(a, b, input, number)
+#define CHECK_ATR(number, a, b, input) check_atr(a, b, input, number)
 
 /**
  * check() - test to check function
@@ -43,8 +43,9 @@ static void check_atr(int16_t a, int16_t b, char *input, int8_t number)
 
 	output = atr(a + b);
 	c = strcmp(input, output);
-	printf("test: %04" PRId8 " [%s] %" PRId16 " %" PRId16 " %s %s\n",
-		number, (c == 0)?"done":"fail", a, b, output, input);
+	printf("test: %04" PRId8 " [%s] %04" PRId16 " + %04" PRId16 " = %04"
+		PRId16 " %s %s %s\n", number, (c == 0)?"done":"fail", a, b,
+		a + b, output, (c == 0)?"==":"!=", input);
 	assert(c == 0);
 }
 
@@ -54,16 +55,16 @@ static void check_atr(int16_t a, int16_t b, char *input, int8_t number)
 
 void run_tests(void)
 {
-	CHECK_ART(1, 2, 1, "III");
-	CHECK_ART(2, 1000, 1, "MI");
-	CHECK_ART(3, 123, 157, "CCLXXX");
-	CHECK_ART(4, 145, 23, "CLXVIII");
-	CHECK_ART(5, 3887, 1, "MMMDCCCLXXXVIII");
-	CHECK_ART(6, 3999, 0, "MMMCMXCIX");
-	CHECK_ART(7, 14, 4, "XVIII");
-	CHECK_ART(8, 123, 256, "CCCLXXIX");
-	CHECK_ART(9, 4, 5, "IX");
-	CHECK_ART(10, 20, 4, "XXIV");
+	CHECK_ATR(1, 2, 1, "III");
+	CHECK_ATR(2, 1000, 1, "MI");
+	CHECK_ATR(3, 123, 157, "CCLXXX");
+	CHECK_ATR(4, 145, 23, "CLXVIII");
+	CHECK_ATR(5, 3887, 1, "MMMDCCCLXXXVIII");
+	CHECK_ATR(6, 3999, 0, "MMMCMXCIX");
+	CHECK_ATR(7, 14, 4, "XVIII");
+	CHECK_ATR(8, 123, 256, "CCCLXXIX");
+	CHECK_ATR(9, 4, 5, "IX");
+	CHECK_ATR(10, 20, 4, "XXIV");
 }
 
 #else
