@@ -1,61 +1,86 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include <inttypes.h>
+
 /*
  * JSUMRZYM - Dodawanie rzymskie
  * http://pl.spoj.com/problems/JSUMRZYM/
  * http://ideone.com/edBLzT
  */
 
-/*
- * ASCII letters representation
- * I = 73, V = 86, X = 88, L = 76, C  = 67, D = 68, M = 77
+const char roman[7] = {'I', 'V', 'X', 'L', 'C', 'D', 'M'};
+const int16_t arabic[7] = {1, 5, 10, 50, 100, 500, 1000};
+
+/**
+ * rta() - convert numbers roman to arabic
+ * @number: number in roman notation
+ *
+ * some description
+ *
+ * Return: return the number in arabic notation
  */
 
-int8_t roman[7] = {73, 86, 88, 76,  67,  68,   77};
-int16_t arabic[7] = { 1,  5, 10, 50, 100, 500, 1000};
-
-int16_t atr(char *liczba)
+static int16_t rta(const char *number)
 {
 	int8_t i;
 	int16_t output = 0, tmp = 0;
 
-	while (*liczba) {
+	/* converting and checking if number offset in roman
+	 * is lower than next offset, then substract that numer
+	 * from output value eg. IX, XC, CM.
+	 */
+
+	while (*number) {
 		for (i = 0; i < 7; i++) {
-			if ((char)*liczba == roman[i]) {
+			if (*number == roman[i]) {
 				if (tmp < arabic[i])
 					tmp *= -1;
 				output += tmp;
-				tmp = (arabic[i]);
+				tmp = arabic[i];
 				break;
 			}
 		}
-		liczba++;
+		number++;
 	}
 
 	return output + tmp;
 }
 
-char *rta(int16_t liczba)
-{
-	int8_t ileZnakow = 0, mod = 0, i = 0;
+/* opis funckcji zgdnie z kernelem  zmienne z podkreslnikiem
+ * zabazpieczyc funkcje przed przyjeciem zlych wartosci parametrow
+ * unit testy plan git commit push review
+ */
 
-	/*
-	 * Letters required for number representation in roman
+/**
+ * atr() - convert numbers arabic to roman
+ * @number: number in arabic notation
+ *
+ * some description
+ *
+ * Return: return the number in roman notation
+ */
+
+static char *atr(int16_t number)
+{
+	int8_t chars_num = 0, mod = 0, i = 0;
+
+	/* Letters required for number representation in roman
 	 * 0 = 0, 1 = 1, 2 = 2, 3 = 3, 4 = 2, 5 = 1, 6 = 2, 7 = 3, 8 = 4, 9 = 2
 	 */
 
 	int8_t map[10] = {0, 1, 2, 3, 2, 1, 2, 3, 4, 2};
-	char *output = (char *)malloc(sizeof(*output)), *out = output, tmp;
+	static char output[15] = {0};
+	char *out = output, tmp;
 
-	while (liczba) {
-		ileZnakow += map[liczba % 10];
-		output = (char *)realloc(output,
-			sizeof(*output) * (ileZnakow + 1));
-		mod = liczba % 5;
+	/* while the number is not zero convert arabic chars
+	 * to numbers repersentation and store result in revesed order
+	 */
+
+	while (number) {
+		chars_num += map[number % 10];
+		mod = number % 5;
 		if (mod == 4) {
-			if (((liczba - 4) % 10) == 0)
+			if (((number - 4) % 10) == 0)
 				*out++ = roman[i+1];
 			else
 				*out++ = roman[i+2];
@@ -63,19 +88,22 @@ char *rta(int16_t liczba)
 		} else {
 			while (mod--)
 				*out++ = roman[i];
-			if ((liczba % 10) >= 5)
+			if ((number % 10) >= 5)
 				*out++ = roman[i+1];
 		}
-		liczba /= 10;
+		number /= 10;
 		i += 2;
 		*out = '\0';
 	}
 
-	for(i = 0; i < ileZnakow; i++){
+	/*  reverse string to the proper order
+	 */
+
+	for (i = 0; i < chars_num; i++) {
 		tmp = output[i];
-		output[i] = output[ileZnakow-1];
-		output[ileZnakow-1] = tmp;
-		ileZnakow--;
+		output[i] = output[chars_num-1];
+		output[chars_num-1] = tmp;
+		chars_num--;
 	}
 	return output;
 }
@@ -85,14 +113,25 @@ char *rta(int16_t liczba)
  * highest number 3999 MMMCMXCIX 12 bits
  */
 
+/**
+ * main() - sum two numbers in arabic and return in roman
+ *
+ * @a: first number in roman
+ * @b: second number in roman
+ *
+ * some description
+ *
+ * Return: display result of sum and return 0;
+ */
+
 int main(void)
 {
 	char a[16] = {0}, b[16] = {0}, *output = NULL;
 
 	while (scanf("%15s %15s", a, b) == 2) {
-		output = rta(atr(a) + atr(b));
+		output = atr(rta(a) + rta(b));
 		printf("%s\n", output);
-		free(output);
 	}
 	return 0;
 }
+
