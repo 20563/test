@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
+#include <assert.h>
+#include <string.h>
 
 /*
  * JSUMRZYM - Dodawanie rzymskie
@@ -46,11 +48,6 @@ static int16_t rta(const char *number)
 	return output + tmp;
 }
 
-/* opis funckcji zgdnie z kernelem  zmienne z podkreslnikiem
- * zabazpieczyc funkcje przed przyjeciem zlych wartosci parametrow
- * unit testy plan git commit push review
- */
-
 /**
  * atr() - convert numbers arabic to roman
  * @number: number in arabic notation
@@ -68,12 +65,12 @@ static char *atr(int16_t number)
 	 * 0 = 0, 1 = 1, 2 = 2, 3 = 3, 4 = 2, 5 = 1, 6 = 2, 7 = 3, 8 = 4, 9 = 2
 	 */
 
-	int8_t map[10] = {0, 1, 2, 3, 2, 1, 2, 3, 4, 2};
+	int8_t map[] = {0, 1, 2, 3, 2, 1, 2, 3, 4, 2};
 	static char output[15] = {0};
 	char *out = output, tmp;
 
 	/* while the number is not zero convert arabic chars
-	 * to numbers repersentation and store result in revesed order
+	 * to numbers repersentation and store result in reversed order
 	 */
 
 	while (number) {
@@ -108,6 +105,7 @@ static char *atr(int16_t number)
 	return output;
 }
 
+
 /*
  * longest number 3888 MMMDCCCLXXXVIII 15 chars
  * highest number 3999 MMMCMXCIX 12 bits
@@ -124,14 +122,36 @@ static char *atr(int16_t number)
  * Return: display result of sum and return 0;
  */
 
+static void check(int16_t a, int16_t b, char *input, int8_t number)
+{
+	char *output = NULL;
+	int8_t c = 0;
+
+	output = atr(a + b);
+	c = strcmp(input, output);
+	printf("test[%" PRId8 "] %s %" PRId16 " %" PRId16 " %s %s\n", number,
+		(c == 0)?"done":"fail", a, b, output, input);
+	assert(c == 0);
+}
+
+#define CHECK_ART(number, a, b, input) check(a, b, input, number)
+
 int main(void)
 {
 	char a[16] = {0}, b[16] = {0}, *output = NULL;
+
+	CHECK_ART(1, 2, 1, "III");
+	CHECK_ART(2, 1000, 1, "MI");
+	CHECK_ART(3, 123, 157, "CCLXXX");
+	CHECK_ART(4, 145, 23, "CLXVIII");
+	CHECK_ART(5, 3887, 1, "MMMDCCCLXXXVIII");
+	CHECK_ART(6, 3999, 0, "MMMCMXCIX");
 
 	while (scanf("%15s %15s", a, b) == 2) {
 		output = atr(rta(a) + rta(b));
 		printf("%s\n", output);
 	}
+
 	return 0;
 }
 
