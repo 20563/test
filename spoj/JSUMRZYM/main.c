@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
+#include <pthread.h>
+#include <time.h>
 
 /** we can compile with flag -DNDEBUG or #define NDEBUG
  * but this only disable assert, not test function
@@ -24,6 +26,8 @@
 static int16_t rta(const char *number);
 static const char *atr(int16_t number);
 void check_rta(const char *input, const int16_t expected_result);
+void time_trigger(void);
+void delay(double time_s);
 
 #ifdef UNIT_TEST
 
@@ -233,6 +237,8 @@ int main(void)
 {
 	char a[16] = {0}, b[16] = {0};
 	char const *output = NULL;
+	pthread_t time_thread;
+
 
 	/** watek w main 2 operacje atomowe mutex semafor */
 
@@ -245,10 +251,38 @@ int main(void)
 	run_tests();
 #endif /** UNIT_TEST */
 
+	
+	if(pthread_create(&time_thread, NULL, time_trigger, NULL)) {
+		fprintf(stderr, "Error creating thread\n");
+		return 1;
+	}
+	
+	delay(10);
+
+
 	while (scanf("%15s %15s", a, b) == 2) {
 		output = atr(rta(a) + rta(b));
 		printf("%s\n", output);
 	}
 
 	return 0;
+}
+
+void time_trigger(void)
+{
+	while(1) {
+		delay(1);
+		printf("Hello World\n");
+
+	}
+	
+}
+
+void delay(double time_s) {
+    const clock_t start = clock();
+    clock_t current;
+    do{
+        current = clock();
+
+    }while((double)(current-start)/CLOCKS_PER_SEC < time_s);
 }
