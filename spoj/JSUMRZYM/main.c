@@ -26,7 +26,7 @@
 static int16_t rta(const char *number);
 static const char *atr(int16_t number);
 void check_rta(const char *input, const int16_t expected_result);
-void time_trigger(void);
+void *time_trigger(void *arg);
 void delay(double time_s);
 
 #ifdef UNIT_TEST
@@ -89,7 +89,7 @@ static void run_tests(void)
 
 	/** bad but marked as expected */
 	check_atr(14, 344, "I", 1);
-	
+
 	check_rta(NULL, FAULT);
 	check_rta("MMMM", FAULT);
 	check_rta("MMMMCMXCIX", FAULT);
@@ -118,12 +118,12 @@ static int16_t rta(const char *number)
 {
 	int8_t i;
 	int16_t output = 0, tmp = 0;
-	
+
 	if (number == NULL)
 		return FAULT;
 
-		
-	
+
+
 
 	/* converting and checking if number offset in roman
 	 * is lower than next offset, then substract that numer
@@ -142,12 +142,12 @@ static int16_t rta(const char *number)
 		}
 		number++;
 	}
-	
+
 	output += tmp;
 
 	if (output > 3999)
 		return FAULT;
-		
+
 	return output;
 }
 
@@ -251,12 +251,12 @@ int main(void)
 	run_tests();
 #endif /** UNIT_TEST */
 
-	
-	if(pthread_create(&time_thread, NULL, time_trigger, NULL)) {
+
+	if(pthread_create(&time_thread, NULL, &time_trigger, NULL)) {
 		fprintf(stderr, "Error creating thread\n");
 		return 1;
 	}
-	
+
 	delay(10);
 
 
@@ -268,14 +268,14 @@ int main(void)
 	return 0;
 }
 
-void time_trigger(void)
+void *time_trigger(void *arg)
 {
 	while(1) {
 		delay(1);
 		printf("Hello World\n");
 
 	}
-	
+
 }
 
 void delay(double time_s) {
