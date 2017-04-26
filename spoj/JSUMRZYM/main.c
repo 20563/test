@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-/* we can compile with flag -DNDEBUG or #define NDEBUG
+/** we can compile with flag -DNDEBUG or #define NDEBUG
  * but this only disable assert, not test function
  */
 
@@ -10,19 +10,18 @@
 #ifdef UNIT_TEST
 #include <assert.h>
 #include <string.h>
-#endif /* UNIT_TEST */
+#endif /** UNIT_TEST */
 
-/*
+/**
  * JSUMRZYM - Dodawanie rzymskie
  * http://pl.spoj.com/problems/JSUMRZYM/
  * http://ideone.com/edBLzT
  */
 
 static int16_t rta(const char *number);
-static char *atr(int16_t number);
+static const char *atr(int16_t number);
 
 #ifdef UNIT_TEST
-#define CHECK_ATR(number, a, b, input) check_atr(a, b, input, number)
 
 /**
  * check() - test to check function
@@ -36,40 +35,57 @@ static char *atr(int16_t number);
  * and when fail then returns assert
  */
 
-static void check_atr(int16_t a, int16_t b, char *input, int8_t number)
+static void check_atr(int8_t number, int16_t input,
+	const char *expected, int8_t action)
 {
-	char *output = NULL;
+	char const *output = NULL;
 	int8_t c = 0;
 
-	output = atr(a + b);
-	c = strcmp(input, output);
-	printf("test: %04" PRId8 " [%s] %04" PRId16 " + %04" PRId16 " = %04"
-		PRId16 " %s %s %s\n", number, (c == 0)?"done":"fail", a, b,
-		a + b, output, (c == 0)?"==":"!=", input);
-	assert(c == 0);
+	output = atr(input);
+	c = strcmp(expected, output);
+
+	/** if expected fail then pass */
+
+	printf("test: %04" PRId8 " [%s] %s\n\n\t%04" PRId16 " %s %s %s\n\n",
+		number, c == 0 ? "pass" : "fail",
+		((c != 0 && action == 1) || c == 0)
+		? "[but expected]" : "[not expected]",
+		input, output, c == 0 ? "==" : "!=", expected);
 }
 
 /**
  * run_tests() - start all tests
  */
 
-void run_tests(void)
+static void run_tests(void)
 {
-	CHECK_ATR(1, 2, 1, "III");
-	CHECK_ATR(2, 1000, 1, "MI");
-	CHECK_ATR(3, 123, 157, "CCLXXX");
-	CHECK_ATR(4, 145, 23, "CLXVIII");
-	CHECK_ATR(5, 3887, 1, "MMMDCCCLXXXVIII");
-	CHECK_ATR(6, 3999, 0, "MMMCMXCIX");
-	CHECK_ATR(7, 14, 4, "XVIII");
-	CHECK_ATR(8, 123, 256, "CCCLXXIX");
-	CHECK_ATR(9, 4, 5, "IX");
-	CHECK_ATR(10, 20, 4, "XXIV");
+	check_atr(1, 3, "III", 0);
+	check_atr(2, 1001, "MI", 0);
+	check_atr(3, 280, "CCLXXX", 0);
+	check_atr(4, 168, "CLXVIII", 0);
+	check_atr(5, 3888, "MMMDCCCLXXXVIII", 0);
+	check_atr(6, 3999, "MMMCMXCIX", 0);
+	check_atr(7, 18, "XVIII", 0);
+
+	/** good and marked as expected, allways good */
+	check_atr(8, 18, "XVIII", 1);
+	check_atr(9, 379, "CCCLXXIX", 0);
+
+	/** bad and marked as good there allways be error */
+	check_atr(10, 379, "CCCLXXI", 0);
+	check_atr(11, 9, "IX", 0);
+	check_atr(12, 24, "XXIV", 0);
+
+	/** bad but marked as expected */
+	check_atr(13, 123, "XXIVI", 1);
+
+	/** bad but marked as expected */
+	check_atr(14, 344, "I", 1);
 }
 
 #else
-void run_tests(void) {}
-#endif /* UNIT_TEST */
+static void run_tests(void) {}
+#endif /** UNIT_TEST */
 
 const char roman[7] = {'I', 'V', 'X', 'L', 'C', 'D', 'M'};
 const int16_t arabic[7] = {1, 5, 10, 50, 100, 500, 1000};
@@ -88,7 +104,7 @@ static int16_t rta(const char *number)
 	int8_t i;
 	int16_t output = 0, tmp = 0;
 
-	/* converting and checking if number offset in roman
+	/** converting and checking if number offset in roman
 	 * is lower than next offset, then substract that numer
 	 * from output value eg. IX, XC, CM.
 	 */
@@ -118,7 +134,7 @@ static int16_t rta(const char *number)
  * Return: return the number in roman notation
  */
 
-static char *atr(int16_t number)
+static const char *atr(int16_t number)
 {
 	int8_t chars_num = 0, mod = 0, i = 0;
 
@@ -154,7 +170,7 @@ static char *atr(int16_t number)
 		*out = '\0';
 	}
 
-	/*  reverse string to the proper order
+	/**  reverse string to the proper order
 	 */
 
 	for (i = 0; i < chars_num; i++) {
@@ -166,7 +182,7 @@ static char *atr(int16_t number)
 	return output;
 }
 
-/*
+/**
  * longest number 3888 MMMDCCCLXXXVIII 15 chars
  * highest number 3999 MMMCMXCIX 12 bits
  */
@@ -184,16 +200,17 @@ static char *atr(int16_t number)
 
 int main(void)
 {
-	char a[16] = {0}, b[16] = {0}, *output = NULL;
-
-	/* we doesnt need to add #ifdef
+	char a[16] = {0}, b[16] = {0};
+	char const *output = NULL;
+/* watek w main 2 operacje atomowe mutex semafor */
+	/** we doesnt need to add #ifdef
 	 * because if UNIT_TEST is not defined
 	 * then function returns void
 	 */
 
 #ifdef UNIT_TEST
 	run_tests();
-#endif /* UNIT_TEST */
+#endif /** UNIT_TEST */
 
 	while (scanf("%15s %15s", a, b) == 2) {
 		output = atr(rta(a) + rta(b));
