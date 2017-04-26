@@ -1,75 +1,13 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
-
-/* we can compile with flag -DNDEBUG or #define NDEBUG
- * but this only disable assert, not test function
- */
-
-#define UNIT_TEST
-#ifdef UNIT_TEST
 #include <assert.h>
-#include <string.h>
-#endif /* UNIT_TEST */
 
 /*
  * JSUMRZYM - Dodawanie rzymskie
  * http://pl.spoj.com/problems/JSUMRZYM/
  * http://ideone.com/edBLzT
  */
-
-static int16_t rta(const char *number);
-static char *atr(int16_t number);
-
-#ifdef UNIT_TEST
-#define CHECK_ATR(number, a, b, input) check_atr(a, b, input, number)
-
-/**
- * check() - test to check function
- *
- * @a: first value
- * @b: second value
- * @input: pointer to expected value
- * @number: test number
- *
- * Return: display if test is done or fail,
- * and when fail then returns assert
- */
-
-static void check_atr(int16_t a, int16_t b, char *input, int8_t number)
-{
-	char *output = NULL;
-	int8_t c = 0;
-
-	output = atr(a + b);
-	c = strcmp(input, output);
-	printf("test: %04" PRId8 " [%s] %04" PRId16 " + %04" PRId16 " = %04"
-		PRId16 " %s %s %s\n", number, (c == 0)?"done":"fail", a, b,
-		a + b, output, (c == 0)?"==":"!=", input);
-	assert(c == 0);
-}
-
-/**
- * run_tests() - start all tests
- */
-
-void run_tests(void)
-{
-	CHECK_ATR(1, 2, 1, "III");
-	CHECK_ATR(2, 1000, 1, "MI");
-	CHECK_ATR(3, 123, 157, "CCLXXX");
-	CHECK_ATR(4, 145, 23, "CLXVIII");
-	CHECK_ATR(5, 3887, 1, "MMMDCCCLXXXVIII");
-	CHECK_ATR(6, 3999, 0, "MMMCMXCIX");
-	CHECK_ATR(7, 14, 4, "XVIII");
-	CHECK_ATR(8, 123, 256, "CCCLXXIX");
-	CHECK_ATR(9, 4, 5, "IX");
-	CHECK_ATR(10, 20, 4, "XXIV");
-}
-
-#else
-void run_tests(void) {}
-#endif /* UNIT_TEST */
 
 const char roman[7] = {'I', 'V', 'X', 'L', 'C', 'D', 'M'};
 const int16_t arabic[7] = {1, 5, 10, 50, 100, 500, 1000};
@@ -85,8 +23,49 @@ const int16_t arabic[7] = {1, 5, 10, 50, 100, 500, 1000};
 
 static int16_t rta(const char *number)
 {
+	int16_t result = 0;
+	int j;
 	int8_t i;
 	int16_t output = 0, tmp = 0;
+	const char *it = number;
+	int count = 0;
+	
+	if (NULL == number)
+		return 0;
+	
+	while (*it) {
+		for (j = 0; (j < 7); ++j) {
+			++it;
+			//printf("it: %c, it+1: %c\n", *it, *(it+1));
+
+			if (*it == *(++it)) {
+				count += 1;
+			}
+			else {
+				count = 0;
+			}
+			
+			if (j%2) {
+				if (1 < count)
+					return 0;					
+					
+			} else {
+				if (3 < count)
+					return 0;
+			}	
+			
+			if (*number == roman[j])
+				break;
+		}
+		printf("symbol: %c, count: %d\n", *it, count);
+
+		
+	}
+
+	if (j > 6)
+		return 0;
+		
+	
 
 	/* converting and checking if number offset in roman
 	 * is lower than next offset, then substract that numer
@@ -105,9 +84,19 @@ static int16_t rta(const char *number)
 		}
 		number++;
 	}
+	
+	output += tmp;
 
-	return output + tmp;
+	if (output > 3999)
+		return 0;
+		
+	return output;
 }
+
+/* opis funckcji zgdnie z kernelem  zmienne z podkreslnikiem
+ * zabazpieczyc funkcje przed przyjeciem zlych wartosci parametrow
+ * unit testy plan git commit push review
+ */
 
 /**
  * atr() - convert numbers arabic to roman
@@ -126,19 +115,19 @@ static char *atr(int16_t number)
 	 * 0 = 0, 1 = 1, 2 = 2, 3 = 3, 4 = 2, 5 = 1, 6 = 2, 7 = 3, 8 = 4, 9 = 2
 	 */
 
-	static int8_t map[] = {0, 1, 2, 3, 2, 1, 2, 3, 4, 2};
+	int8_t map[10] = {0, 1, 2, 3, 2, 1, 2, 3, 4, 2};
 	static char output[15] = {0};
 	char *out = output, tmp;
 
 	/* while the number is not zero convert arabic chars
-	 * to numbers repersentation and store result in reversed order
+	 * to numbers repersentation and store result in revesed order
 	 */
 
 	while (number) {
 		chars_num += map[number % 10];
 		mod = number % 5;
 		if (mod == 4) {
-			if ((number - 4) % 10 == 0)
+			if (((number - 4) % 10) == 0)
 				*out++ = roman[i+1];
 			else
 				*out++ = roman[i+2];
@@ -172,7 +161,7 @@ static char *atr(int16_t number)
  */
 
 /**
- * main()
+ * main() - sum two numbers in arabic and return in roman
  *
  * @a: first number in roman
  * @b: second number in roman
@@ -184,22 +173,40 @@ static char *atr(int16_t number)
 
 int main(void)
 {
+	char *ptr = NULL;
+	char *data = "IIII";
 	char a[16] = {0}, b[16] = {0}, *output = NULL;
+	
+	assert(0 == rta(ptr));
+	printf("test1 passed\n");
+	
+	assert(0 == rta("zzc"));
+	printf("test2 passed\n");
+	
+	assert(3 == rta("III"));
+	//assert(1499 == rta("MCDXCIX"));
+	//assert(3457 == rta("MMMCDLVII"));
+	printf("test3 passed\n");
+	
+	assert(0 == rta("MMMM"));
+	assert(0 == rta("MMMMCMXCIX"));
+	printf("test4 passed\n");
+	
+	/*
+	assert(0 == rta("IIIII"));
+	assert(0 == rta("VV"));
+	printf("test5 passed\n");
+	*/
 
-	/* we doesnt need to add #ifdef
-	 * because if UNIT_TEST is not defined
-	 * then function returns void
-	 */
-
-#ifdef UNIT_TEST
-	run_tests();
-#endif /* UNIT_TEST */
-
+	//printf("rta(IIIII): %d\n", rta("IIII"));
+	
+	
+/*
 	while (scanf("%15s %15s", a, b) == 2) {
 		output = atr(rta(a) + rta(b));
 		printf("%s\n", output);
 	}
-
+*/
+//	printf("result: %d\n", rta("MCDXCIX"));
 	return 0;
 }
-
