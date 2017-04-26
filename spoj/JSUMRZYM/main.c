@@ -10,6 +10,9 @@
 #ifdef UNIT_TEST
 #include <assert.h>
 #include <string.h>
+
+#define FAULT -1
+
 #endif /** UNIT_TEST */
 
 /**
@@ -20,6 +23,7 @@
 
 static int16_t rta(const char *number);
 static const char *atr(int16_t number);
+void check_rta(const char *input, const int16_t expected_result);
 
 #ifdef UNIT_TEST
 
@@ -81,6 +85,13 @@ static void run_tests(void)
 
 	/** bad but marked as expected */
 	check_atr(14, 344, "I", 1);
+	
+	check_rta(NULL, FAULT);
+	check_rta("MMMM", FAULT);
+	check_rta("MMMMCMXCIX", FAULT);
+	check_rta("III", 3);
+	check_rta("MCDXCIX", 1499);
+	check_rta("MMMCDLVII", 3457);
 }
 
 #else
@@ -103,8 +114,14 @@ static int16_t rta(const char *number)
 {
 	int8_t i;
 	int16_t output = 0, tmp = 0;
+	
+	if (number == NULL)
+		return FAULT;
 
-	/** converting and checking if number offset in roman
+		
+	
+
+	/* converting and checking if number offset in roman
 	 * is lower than next offset, then substract that numer
 	 * from output value eg. IX, XC, CM.
 	 */
@@ -121,9 +138,15 @@ static int16_t rta(const char *number)
 		}
 		number++;
 	}
+	
+	output += tmp;
 
-	return output + tmp;
+	if (output > 3999)
+		return FAULT;
+		
+	return output;
 }
+
 
 /**
  * atr() - convert numbers arabic to roman
@@ -198,6 +221,14 @@ static const char *atr(int16_t number)
  * Return: display result of sum and return 0;
  */
 
+void check_rta(const char *input, const int16_t expected_result)
+{
+	int16_t result = 0;
+
+	result = rta(input);
+	(result == expected_result)? printf("test passed\n"):(printf("test failed\n"));
+}
+
 int main(void)
 {
 	char a[16] = {0}, b[16] = {0};
@@ -221,4 +252,3 @@ int main(void)
 
 	return 0;
 }
-
