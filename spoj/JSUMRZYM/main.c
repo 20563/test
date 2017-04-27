@@ -17,7 +17,6 @@
 #ifdef UNIT_TEST
 #include <assert.h>
 #include <string.h>
-
 #define FAULT -1
 
 #endif /** UNIT_TEST */
@@ -27,7 +26,9 @@
  * http://pl.spoj.com/problems/JSUMRZYM/
  * http://ideone.com/edBLzT
  */
-   pthread_mutex_t lock;
+  
+pthread_spinlock_t lock;
+
 
 static int16_t rta(const char *number);
 
@@ -70,18 +71,18 @@ static void check_atr(int8_t number, int16_t input,
         char const *output = NULL;
         char out[16];
         int8_t c = 0;
-        /** pthread_spin_lock(); */
-		pthread_mutex_lock(&lock);
+
+	pthread_spin_lock(&lock);
         output = atr(input);
         strcpy(out,output);
-    	pthread_mutex_unlock(&lock);
+    	pthread_spin_unlock(&lock);
         c = strcmp(expected, out);
 
         /** if expected fail then pass */
 
         printf("test: %04" PRId8 " %s %"PRId16" %s %s %s\n",
-                number,
-				(c == 0) == (action == 0) ? "pass" : "fail", input, out, c == 0 ? "==" : "!=", expected);
+                number, (c == 0) == (action == 0) ? "pass" : "fail", 
+		input, out, c == 0 ? "==" : "!=", expected);
         assert((c == 0) == (action == 0));
 }
 
@@ -101,11 +102,9 @@ static void run_tests(void)
         check_atr(7, 18, "XVIII", 0);
 
         /** good and marked as expected, allways good */
-        //check_atr(8, 18, "XVIII", 1);
         check_atr(9, 379, "CCCLXXIX", 0);
 
         /** bad and marked as good there allways be error */
-        //check_atr(10, 379, "CCCLXXI", 0);
         check_atr(11, 9, "IX", 0);
         check_atr(12, 24, "XXIV", 0);
 
@@ -254,18 +253,20 @@ void check_rta(const char *input, const int16_t expected_result)
 {
         int16_t result = 0;
 
-		pthread_mutex_lock(&lock);
+	pthread_spin_lock(&lock);
         result = rta(input);
         (result == expected_result)? printf("test passed\n"):(printf("test failed\n"));
-		pthread_mutex_unlock(&lock);
+	pthread_spin_unlock(&lock);
 }
 
 int main(void)
 {
         char a[16] = {0}, b[16] = {0};
         char const *output = NULL;
+        int pshared = PTHREAD_PROCESS_PRIVATE;
         pthread_t time_thread;
-        pthread_mutex_init(&lock,NULL);
+        pthread_spin_init(&lock, pshared); 
+
 
 
         if(pthread_create(&time_thread, NULL, &time_trigger, NULL)) {
