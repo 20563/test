@@ -28,6 +28,7 @@ pthread_spinlock_t lock;
 
 static int16_t rta(const char *number);
 static const char *atr(int16_t number);
+struct atr_data *atr_data_p;
 
 
 #ifdef UNIT_TEST
@@ -35,26 +36,29 @@ static const char *atr(int16_t number);
 static void check_rta(const char *input, const int16_t expected_result);
 static void check_atr(int8_t number, int16_t input,
 	const char *expected, int8_t action);
-static const char *atr_th(int16_t number);
+static void atr_th(struct atr_data *number);
 void *time_trigger(void *arg);
 void *test_runner(void *arg);
+
+struct atr_data {
+	int16_t number_input;
+	char atr_res[16];
+	int ready;
+};
 
 /** https://github.com/OpenChannelSSD/linux/blob/master/
  * Documentation/process/volatile-considered-harmful.rst
  */
 
-static int16_t g_number;
-static const char *g_atr_res;
 
-static const char *atr_th(int16_t number)
+static void atr_th(struct atr_data *number)
 {
-	g_number = number;
-
-	while (g_number) {
+	number->ready = 0;
+	atr_data_p = number;
+	while (!number->ready) {
+		/** Nothing to do */
 		/** Nothing to do */
 	}
-
-	return g_atr_res;
 }
 
 
@@ -93,13 +97,14 @@ static void check_rta(const char *input, const int16_t expected_result)
 static void check_atr(int8_t number, int16_t input,
 	const char *expected, int8_t action)
 {
-	char const *output = NULL;
 	char out[16];
 	int8_t c = 0;
+	struct atr_data atr_data;
 
 	pthread_spin_lock(&lock);
-	output = atr_th(input);
-	strcpy(out, output);
+	atr_data.number_input = input;
+	atr_th(&atr_data);
+	strcpy(out, atr_data.atr_res);
 	pthread_spin_unlock(&lock);
 	c = strcmp(expected, out);
 
@@ -149,11 +154,12 @@ static void run_tests(void)
 void *time_trigger(void *arg)
 {
 	while (1) {
-		if (!g_number)
+		if (!atr_data_p)
 			continue;
 
-		g_atr_res = atr(g_number);
-		g_number = 0;
+		strcpy(atr_data_p->atr_res, atr(atr_data_p->number_input));
+		atr_data_p->ready = 1; /** &g_number = 0xffffeeff */
+		atr_data_p = NULL;
 	}
 }
 
@@ -227,6 +233,7 @@ static const char *atr(int16_t number)
 {
 	int8_t chars_num = 0, mod = 0, i = 0;
 
+
 	/* Letters required for number representation in roman
 	 * 0 = 0, 1 = 1, 2 = 2, 3 = 3, 4 = 2, 5 = 1, 6 = 2, 7 = 3, 8 = 4, 9 = 2
 	 */
@@ -288,8 +295,10 @@ static const char *atr(int16_t number)
 
 int main(void)
 {
-	char a[16] = {0}, b[16] = {0};
-	char const *output = NULL;
+	/** char a[16] = {0}, b[16] = {0};
+	 * char const *output = NULL;
+	 */
+
 	int pshared = PTHREAD_PROCESS_PRIVATE;
 	pthread_t time_thread;
 
@@ -323,10 +332,11 @@ int main(void)
 	run_tests();
 #endif /** UNIT_TEST */
 
-	while (scanf("%15s %15s", a, b) == 2) {
-		output = atr_th(rta(a) + rta(b));
-		printf("%s\n", output);
-	}
-
+/**
+ *	while (scanf("%15s %15s", a, b) == 2) {
+ *		atr_th(rta(a) + rta(b));
+ *		printf("%s\n", output);
+ *	}
+ */
 	return 0;
 }
