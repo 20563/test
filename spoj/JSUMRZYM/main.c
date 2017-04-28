@@ -43,7 +43,7 @@ void *test_runner(void *arg);
 struct atr_data {
 	int16_t number_input;
 	char atr_res[16];
-	int ready;
+	volatile int ready;
 };
 
 /** https://github.com/OpenChannelSSD/linux/blob/master/
@@ -56,7 +56,6 @@ static void atr_th(struct atr_data *number)
 	number->ready = 0;
 	atr_data_p = number;
 	while (!number->ready) {
-		/** Nothing to do */
 		/** Nothing to do */
 	}
 }
@@ -104,6 +103,7 @@ static void check_atr(int8_t number, int16_t input,
 	pthread_spin_lock(&lock);
 	atr_data.number_input = input;
 	atr_th(&atr_data);
+
 	strcpy(out, atr_data.atr_res);
 	pthread_spin_unlock(&lock);
 	c = strcmp(expected, out);
@@ -114,6 +114,7 @@ static void check_atr(int8_t number, int16_t input,
 		number, (c == 0) == (action == 0) ? "pass" : "fail",
 		input, out, c == 0 ? "==" : "!=", expected);
 		assert((c == 0) == (action == 0));
+
 }
 
 /**
@@ -149,16 +150,18 @@ static void run_tests(void)
 	check_rta("III", 3);
 	check_rta("MCDXCIX", 1499);
 	check_rta("MMMCDLVII", 3457);
+
 }
 
 void *time_trigger(void *arg)
 {
 	while (1) {
-		if (!atr_data_p)
+		if (!atr_data_p) 
 			continue;
+		
 
 		strcpy(atr_data_p->atr_res, atr(atr_data_p->number_input));
-		atr_data_p->ready = 1; /** &g_number = 0xffffeeff */
+		atr_data_p->ready = 1; // &g_number = 0xffffeeff
 		atr_data_p = NULL;
 	}
 }
@@ -295,10 +298,6 @@ static const char *atr(int16_t number)
 
 int main(void)
 {
-	/** char a[16] = {0}, b[16] = {0};
-	 * char const *output = NULL;
-	 */
-
 	int pshared = PTHREAD_PROCESS_PRIVATE;
 	pthread_t time_thread;
 
@@ -320,7 +319,7 @@ int main(void)
 	}
 #endif
 	while (1)
-		sleep(1);
+		Sleep(1);
 	/** watek w main 2 operacje atomowe mutex semafor */
 
 	/** we doesnt need to add #ifdef
@@ -331,12 +330,11 @@ int main(void)
 #ifdef UNIT_TEST
 	run_tests();
 #endif /** UNIT_TEST */
-
-/**
- *	while (scanf("%15s %15s", a, b) == 2) {
- *		atr_th(rta(a) + rta(b));
- *		printf("%s\n", output);
- *	}
- */
+/*
+	while (scanf("%15s %15s", a, b) == 2) {
+		output = atr_th(rta(a) + rta(b));
+		printf("%s\n", output);
+	}
+*/
 	return 0;
 }
