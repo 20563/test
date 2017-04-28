@@ -29,6 +29,8 @@ pthread_spinlock_t lock;
 static int16_t rta(const char *number);
 static const char *atr(int16_t number);
 struct atr_data *atr_data_p;
+struct rta_data *rta_data_p;
+
 
 
 #ifdef UNIT_TEST
@@ -43,7 +45,16 @@ void *test_runner(void *arg);
 struct atr_data {
 	int16_t number_input;
 	char atr_res[16];
-	volatile int ready;
+	//volatile int ready;
+	int ready;
+};
+
+struct rta_data {
+	int16_t rta_res;
+
+	char rta_input[16];
+	//volatile int ready;
+	int ready;
 };
 
 /** https://github.com/OpenChannelSSD/linux/blob/master/
@@ -56,6 +67,17 @@ static void atr_th(struct atr_data *number)
 	number->ready = 0;
 	atr_data_p = number;
 	while (!number->ready) {
+		/** Nothing to do */
+		/** Nothing to do */
+	}
+}
+
+static void rta_th(struct rta_data *number)
+{
+	number->ready = 0;
+	rta_data_p = number;
+	while (!number->ready) {
+		/** Nothing to do */
 		/** Nothing to do */
 	}
 }
@@ -72,11 +94,17 @@ static void atr_th(struct atr_data *number)
 
 static void check_rta(const char *input, const int16_t expected_result)
 {
-	int16_t result = 0;
+	struct rta_data rta_data;
+
 
 	pthread_spin_lock(&lock);
-	result = rta(input);
-	(result == expected_result) ?
+	if (!input)
+		strcpy(rta_data.rta_input, "\0");
+	else
+		strcpy(rta_data.rta_input, input);
+	rta_th(&rta_data);
+	rta_data.rta_res = rta(rta_data.rta_input);
+	(rta_data.rta_res == expected_result) ?
 		printf("test passed\n") : printf("test failed\n");
 	pthread_spin_unlock(&lock);
 }
@@ -123,6 +151,7 @@ static void check_atr(int8_t number, int16_t input,
 
 static void run_tests(void)
 {
+
 	check_atr(1, 3, "III", 0);
 	check_atr(2, 1001, "MI", 0);
 	check_atr(3, 280, "CCLXXX", 0);
@@ -156,13 +185,17 @@ static void run_tests(void)
 void *time_trigger(void *arg)
 {
 	while (1) {
-		if (!atr_data_p) 
-			continue;
-		
+		if (atr_data_p) {
+			strcpy(atr_data_p->atr_res,
+				atr(atr_data_p->number_input));
+			atr_data_p->ready = 1; // &g_number = 0xffffeeff
+			atr_data_p = NULL;
 
-		strcpy(atr_data_p->atr_res, atr(atr_data_p->number_input));
-		atr_data_p->ready = 1; // &g_number = 0xffffeeff
-		atr_data_p = NULL;
+		} else if (rta_data_p) {
+			rta_data_p->rta_res = rta(rta_data_p->rta_input);
+			rta_data_p->ready = 1; // &g_number = 0xffffeeff
+			rta_data_p = NULL;
+		}
 	}
 }
 
@@ -331,10 +364,10 @@ int main(void)
 	run_tests();
 #endif /** UNIT_TEST */
 /*
-	while (scanf("%15s %15s", a, b) == 2) {
-		output = atr_th(rta(a) + rta(b));
-		printf("%s\n", output);
-	}
-*/
+ *	while (scanf("%15s %15s", a, b) == 2) {
+ *		output = atr_th(rta(a) + rta(b));
+ *		printf("%s\n", output);
+ *	}
+ */
 	return 0;
 }
