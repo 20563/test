@@ -24,10 +24,6 @@
  * http://ideone.com/edBLzT
  */
 
-/*
- * test pull merge comment
- */
-
 pthread_spinlock_t lock;
 
 static int16_t rta(const char *number);
