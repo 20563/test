@@ -24,12 +24,15 @@
  * http://ideone.com/edBLzT
  */
 
+/*
+ * test pull merge comment
+ */
+
 pthread_spinlock_t lock;
 
 static int16_t rta(const char *number);
 static const char *atr(int16_t number);
 struct atr_data *atr_data_p;
-
 
 #ifdef UNIT_TEST
 
